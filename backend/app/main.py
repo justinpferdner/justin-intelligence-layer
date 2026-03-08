@@ -15,7 +15,8 @@ from langchain_chroma import Chroma
 load_dotenv()
 
 CHROMA_PATH = os.getenv("CHROMA_PATH")
-DATA_PATH = os.getenv("DATA_PATH")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "data", "justin_profile.md")
 
 app = FastAPI()
 
