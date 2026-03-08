@@ -29,7 +29,7 @@ export default function Chat() {
     setIsTyping(true);
   
     try {
-      const res = await fetch("https://justin-intelligence-layer-production.up.railway.app/", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
