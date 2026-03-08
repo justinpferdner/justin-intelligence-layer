@@ -4,6 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
 import os
+import shutil
 
 load_dotenv()
 
@@ -12,6 +13,11 @@ DATA_PATH = os.getenv("DATA_PATH")
 CHROMA_PATH = "chroma_db"
 
 def ingest():
+    # Wipe existing DB to avoid duplicates
+    if os.path.exists(CHROMA_PATH):
+        shutil.rmtree(CHROMA_PATH)
+        print("Cleared existing ChromaDB")
+    
     print("Loading document...")
     loader = TextLoader(DATA_PATH)
     documents = loader.load()

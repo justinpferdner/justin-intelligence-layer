@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   id: number;
@@ -20,22 +21,36 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
     const userMessage: Message = { id: Date.now(), content: input, sender: "user" };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      setIsTyping(false);
+    try {
+      const res = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+      const data = await res.json();
       const aiMessage: Message = {
         id: Date.now() + 1,
-        content: "This is a placeholder response from Justin AI.",
+        content: data.response,
         sender: "justinAI",
       };
       setMessages((prev) => [...prev, aiMessage]);
-    }, 1200);
+    } catch (error) {
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        content: "Sorry, I'm having trouble connecting right now. Please try again.",
+        sender: "justinAI",
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -421,6 +436,24 @@ export default function Chat() {
           color: var(--text);
           background: var(--accent-dim);
         }
+
+        .message-bubble p {
+          margin-bottom: 8px;
+        }
+
+        .message-bubble ul, 
+        .message-bubble ol {
+          margin: 8px 0;
+          padding-left: 28px;
+        }
+
+        .message-bubble li {
+          margin-bottom: 6px;
+        }
+
+        .message-bubble strong {
+          color: var(--accent);
+        }
       `}</style>
 
       <div className="chat-root">
@@ -468,7 +501,15 @@ export default function Chat() {
                 <div key={msg.id} className={`message-row ${isAI ? "ai" : "user"}`}>
                   <div className={`message-bubble ${isAI ? "ai" : "user"}`}>
                     {isAI && showLabel && <span className="ai-label">Justin AI</span>}
+                    <ReactMarkdown
+                  components={{
+                      ul: ({node, ...props}) => <ul style={{listStyleType: 'disc', paddingLeft: '28px', margin: '8px 0'}} {...props} />,
+                      ol: ({node, ...props}) => <ol style={{listStyleType: 'decimal', paddingLeft: '28px', margin: '8px 0'}} {...props} />,
+                      li: ({node, ...props}) => <li style={{marginBottom: '6px'}} {...props} />,
+                    }}
+                  >
                     {msg.content}
+                  </ReactMarkdown>
                   </div>
                 </div>
               );
