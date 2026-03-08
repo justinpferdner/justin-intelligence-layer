@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_chroma import Chroma
 from dotenv import load_dotenv
 from openai import OpenAI
 import os
 from datetime import date
+# for streaming
+from fastapi.responses import StreamingResponse
+
+# RAG components, used in ingest.py. leaving here for V2
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_chroma import Chroma
 
 load_dotenv()
 
@@ -69,21 +73,22 @@ def root():
     return {"status": "Justin AI backend is running"}
 
 @app.post("/chat")
-def chat(request: ChatRequest) -> ChatResponse:
+def chat(request: ChatRequest):
     # Build message history for GPT
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # Add conversation history
     for msg in request.history:
         messages.append({"role": msg.role, "content": msg.content})
 
-    # Add current message
     messages.append({"role": "user", "content": request.message})
 
-    # Call GPT with full history
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages
-    )
+    def stream():
+        with client.chat.completions.stream(
+            model="gpt-4o-mini",
+            messages=messages
+        ) as s:
+            for chunk in s:
+                if chunk.type == "content.delta":
+                    yield chunk.delta
 
-    return ChatResponse(response=response.choices[0].message.content)
+    return StreamingResponse(stream(), media_type="text/plain")
