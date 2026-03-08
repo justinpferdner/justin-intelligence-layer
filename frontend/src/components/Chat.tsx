@@ -29,7 +29,7 @@ export default function Chat() {
     setIsTyping(true);
   
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch("https://justin-intelligence-layer-production.up.railway.app/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
