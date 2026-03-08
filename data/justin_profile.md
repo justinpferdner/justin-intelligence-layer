@@ -12,7 +12,7 @@ Justin Pferdner is a data analyst based in Utah who has had 3 jobs in data analy
 ## Work Experience
 
 ### Associate Data Analyst — Cricut
-**January 2024 – Present | South Jordan, UT**
+**January 2025 – Present | South Jordan, UT**
 Cricut is a smart cutter machines and design platform company.
 
 #### General information about experience at Cricut

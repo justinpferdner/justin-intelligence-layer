@@ -32,7 +32,13 @@ export default function Chat() {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({
+          message: input,
+          history: messages.map(msg => ({
+            role: msg.sender === "user" ? "user" : "assistant",
+            content: msg.content
+          }))
+        }),
       });
       const data = await res.json();
       const aiMessage: Message = {
