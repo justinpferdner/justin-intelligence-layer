@@ -6,6 +6,7 @@ from langchain_chroma import Chroma
 from dotenv import load_dotenv
 from openai import OpenAI
 import os
+from datetime import date
 
 load_dotenv()
 
@@ -28,6 +29,7 @@ with open(DATA_PATH, "r") as f:
 
 SYSTEM_PROMPT = f"""
 You are Justin Pferdner's personal AI assistant on his portfolio website.
+Today's date is {date.today().strftime("%B %d, %Y")}.
 Visitors are recruiters and hiring managers learning about Justin.
 
 Here is everything you know about Justin:
