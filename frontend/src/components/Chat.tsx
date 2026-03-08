@@ -27,7 +27,7 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
-
+  
     try {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
@@ -40,13 +40,34 @@ export default function Chat() {
           }))
         }),
       });
-      const data = await res.json();
+  
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+  
+      // Add an empty AI message first
       const aiMessage: Message = {
         id: Date.now() + 1,
-        content: data.response,
+        content: "",
         sender: "justinAI",
       };
       setMessages((prev) => [...prev, aiMessage]);
+      setIsTyping(false);
+  
+      // Append tokens as they stream in
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: updated[updated.length - 1].content + chunk,
+          };
+          return updated;
+        });
+      }
+  
     } catch (error) {
       const aiMessage: Message = {
         id: Date.now() + 1,
